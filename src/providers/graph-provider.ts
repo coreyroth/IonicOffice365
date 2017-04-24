@@ -31,6 +31,7 @@ export class GraphProvider {
 
   appServiceLogin(): Promise<any> {
     return new Promise<any>((resolve, reject) => {
+      // HACK - required to be able to login from PWA / ionic serve because AAD login doesn't work in IFrame
       if (this.platform.is('core')) {
         let appServiceLoginUrl = Resources.azureMobileClientUrl + '/.auth/login/aad?session_mode=token&completion_type=postMessage&completion_origin=' + this.redirectUrl;
 
@@ -277,6 +278,49 @@ export class GraphProvider {
 
         }
       });
+    });
+  }
+
+  getUsers(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      let apiUrl = "https://graph.microsoft.com/beta/users";
+      var headers = new Headers();
+      headers.append('Authorization', 'Bearer ' + this.appServiceAccessToken);
+
+      return this.http.get(apiUrl, { headers: headers })
+        .map(res => res.json())
+        .subscribe(data => {
+          console.log("Data - ", data);
+          resolve(data.value);
+        },
+        error => {
+          console.log("Error - ", error);
+          reject(error);
+        },
+        () => {
+        });
+    });
+  }
+
+
+  getGroups(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      let apiUrl = "https://graph.microsoft.com/beta/groups?$orderBy=DisplayName";
+      var headers = new Headers();
+      headers.append('Authorization', 'Bearer ' + this.appServiceAccessToken);
+
+      return this.http.get(apiUrl, { headers: headers })
+        .map(res => res.json())
+        .subscribe(data => {
+          console.log("Data - ", data);
+          resolve(data.value);
+        },
+        error => {
+          console.log("Error - ", error);
+          reject(error);
+        },
+        () => {
+        });
     });
   }
 }
