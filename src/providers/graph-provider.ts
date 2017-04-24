@@ -202,6 +202,7 @@ export class GraphProvider {
                 this.setUserProfile(userProfile);
               }
               reader.readAsDataURL(data._body);
+              this.setUserProfile(userProfile);
               resolve(this.userProfile);
             }, error => {
               // save user profile even if we can't get the image
