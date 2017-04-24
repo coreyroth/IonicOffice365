@@ -11,6 +11,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 
 import { AzureService } from '../providers/azure-service';
 import { GraphProvider } from '../providers/graph-provider';
@@ -41,7 +42,8 @@ import { GraphProvider } from '../providers/graph-provider';
     SplashScreen,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
     AzureService,
-    GraphProvider
+    GraphProvider,
+    InAppBrowser
   ]
 })
 export class AppModule {}

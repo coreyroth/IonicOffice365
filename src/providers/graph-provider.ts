@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Headers, ResponseContentType } from '@angular/http';
 import { Platform, Events } from 'ionic-angular';
-import { InAppBrowser, File } from 'ionic-native';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { AzureService } from './azure-service';
 import { Resources } from './resources';
 import 'rxjs/add/operator/map';
@@ -25,7 +25,7 @@ export class GraphProvider {
   redirectUrl: string = location.origin;
   userProfile: UserProfile;
 
-  constructor(public http: Http, public platform: Platform, public events: Events, public azureService: AzureService) {
+  constructor(public http: Http, public platform: Platform, public events: Events, public inAppBrowser: InAppBrowser, public azureService: AzureService) {
     console.log('Hello GraphProvider Provider');
   }
 
@@ -241,5 +241,42 @@ export class GraphProvider {
 
   setUserProfile(userProfile) {
     this.userProfile = userProfile;
+  }
+
+  logout() {
+    window.localStorage.removeItem(Resources.appServiceAccessTokenKey);
+    window.localStorage.removeItem(Resources.appServiceUserNameKey);
+    window.localStorage.removeItem(Resources.mobileServicesAuthenticationToken);
+    window.localStorage.removeItem(Resources.appSeviceCurrentUserKey);
+
+    this.userProfile = undefined;
+    this.appServiceLoggedIn = false;
+    this.appServiceAccessToken = undefined;
+    this.appServiceAuthenticationToken = undefined;
+    this.azureService.mobileServiceClient.logout();
+
+    if (this.platform.is('core')) {
+      location.href = "https://login.microsoftonline.com/common/oauth2/v2.0/logout";
+    }
+    else {
+      return this.logoutViaBrowser();
+    }
+  }
+
+  logoutViaBrowser(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      let browserRef = this.inAppBrowser.create("https://login.microsoftonline.com/common/oauth2/v2.0/logout", '_blank', 'location=no,hardwareback=no');
+      browserRef.on("loadstart").subscribe(event => {
+        console.log('Load Start');
+        if ((event.url).indexOf("https://login.microsoftonline.com/common/oauth2/v2.0/logoutsession") === 0) {
+          console.log('Mobile - Logged out');
+          browserRef.close();
+
+          this.events.publish(Resources.appServiceLogoutEventKey, {});
+          resolve(true);
+
+        }
+      });
+    });
   }
 }

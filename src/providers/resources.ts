@@ -7,4 +7,5 @@ export class Resources {
 
 
     public static appServiceLoginCompletedEventKey = 'app.service:login.complete';
+    public static appServiceLogoutEventKey = 'app.service:logout';
 }

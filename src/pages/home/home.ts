@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, Events } from 'ionic-angular';
 
 import { GraphProvider } from './../../providers/graph-provider';
 import { UserProfile } from './../../providers/user-profile';
+
+import { Resources } from './../../providers/resources';
 
 @Component({
   selector: 'page-home',
@@ -11,8 +13,11 @@ import { UserProfile } from './../../providers/user-profile';
 export class HomePage {
   userProfile: UserProfile;
 
-  constructor(public navCtrl: NavController, public graphProvider: GraphProvider) {
-
+  constructor(public navCtrl: NavController, public events: Events, public graphProvider: GraphProvider) {
+    this.events.subscribe(Resources.appServiceLogoutEventKey, userEventData => {
+      console.log('Home - log out event.');
+      this.userProfile = undefined;
+    });
   }
 
   login(event) {
@@ -34,4 +39,8 @@ export class HomePage {
       });
   }
 
+  logout(event) {
+    this.graphProvider.logout();
+  }
+ 
 }
